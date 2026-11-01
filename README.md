@@ -1,8 +1,8 @@
 # go-homework
 
-Go 语言课程课后作业集合（homework01 ~ homework04）。
+Go 语言课程课后作业集合（homework01 ~ homework05）。
 
-从基础语法、并发编程，一路做到 GORM 持久化与 Gin Web 服务。
+从基础语法、并发编程，一路做到 GORM 持久化、Gin Web 服务与以太坊链上交互。
 
 ## 目录结构
 
@@ -11,7 +11,8 @@ go-homework/
 ├── homework01/     Go 基础算法题（8 题）+ 单元测试
 ├── homework02/     Go 基础语法与并发练习（10 题）
 ├── homework03/     GORM + SQLite 博客系统（模型 / 关联查询 / 钩子函数）
-└── homework04/     Gin + GORM + JWT 博客 API 项目（分层架构）
+├── homework04/     Gin + GORM + JWT 博客 API 项目（分层架构）
+└── homework05/     Sepolia 链上交互 + Counter 合约（go-ethereum / abigen）
 ```
 
 ---
@@ -108,9 +109,42 @@ go run main.go
 > `JWT_SECRET` 默认值为 `dev-secret`，仅供本地开发使用，部署时请务必通过环境变量覆盖。
 > 演示账号由 `internal/database` 在初始化时写入：用户名 `demo` / 密码 `demo123456`。
 
+## homework05 — Sepolia 区块链交互
+
+使用 `go-ethereum` 连接 Sepolia 测试网：查询区块、发送 ETH 转账、部署 `Counter` 合约，并通过 `abigen` 生成的绑定代码读写合约。
+
+```
+homework05/
+├── cmd/account/              查询账户余额、nonce、账户类型
+├── cmd/block/                查询指定区块（哈希、时间戳、交易等）
+├── cmd/transfer/             构造、签名并发送 ETH 转账
+├── cmd/deploy/               部署 Counter，地址写入 deployments/
+├── cmd/counter/              读取 count、increment、set、查询事件
+├── contracts/Counter.sol     计数器合约源码（同目录含 ABI / 字节码）
+├── bindings/counter/         abigen 生成的 Go 绑定
+└── .env                      RPC 地址与私钥（私钥为占位符）
+```
+
+```bash
+cd homework05
+go run ./cmd/account
+go run ./cmd/block -number 12020312
+go run ./cmd/transfer -to 0x... -amount 0.001
+go run ./cmd/deploy
+go run ./cmd/counter get
+go run ./cmd/counter increment
+go run ./cmd/counter set 42
+go run ./cmd/counter events
+```
+
+> `.env` 中只提交私钥占位符 `0xYOUR_PRIVATE_KEY_HERE`；运行写操作前请在本地替换成自己的 Sepolia 测试账户私钥，不要把真实私钥提交到 git。
+
+部署记录保存在 `homework05/deployments/counter-11155111.json`。
+
 ---
 
 ## 环境
 
 - Go 1.27.1
 - homework03 / homework04 依赖 GORM、Gin、`github.com/glebarez/sqlite`（纯 Go 的 SQLite 驱动，无需 CGO）
+- homework05 依赖 `github.com/ethereum/go-ethereum`；合约用 solc 编译，Go 绑定由 abigen 生成

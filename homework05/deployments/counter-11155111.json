@@ -1,0 +1,8 @@
+{
+  "chainId": 11155111,
+  "contract": "Counter",
+  "address": "0x39A02dA908B7Aae70eCC8e963bd4EC57f48FC3dF",
+  "txHash": "0x81026d4dea29d097e0d9b990a72089c34e25592279c2a2abb056e73d55c5fdb0",
+  "blockNumber": 12041119,
+  "deployedAt": "2026-11-01T12:51:26.3607589Z"
+}
