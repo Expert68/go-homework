@@ -27,6 +27,7 @@ func Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.Fail(c, utils.BadRequest("请求参数不合法："+err.Error()))
+		return
 	}
 
 	var exists int64
@@ -58,6 +59,7 @@ func Register(c *gin.Context) {
 	if err := database.DB.Create(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			utils.Fail(c, utils.Conflict("用户名或邮箱已被注册"))
+			return
 		}
 		utils.Fail(c, utils.Internal(err))
 		return
@@ -69,11 +71,12 @@ func Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.Fail(c, utils.BadRequest("请求参数不合法: "+err.Error()))
+		return
 	}
 
 	var user models.User
 
-	err := database.DB.Where(&models.User{}).First(&user).Error
+	err := database.DB.Where("username = ?", req.Username).First(&user).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		utils.Fail(c, utils.Unauthorized("用户名或密码错误"))
